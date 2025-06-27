@@ -23,10 +23,12 @@ startBtn.onclick = () => {
   popupInfo.classList.add("active");
   main.classList.add("active");
 };
+
 exitBtn.onclick = () => {
   popupInfo.classList.remove("active");
   main.classList.remove("active");
 };
+
 continueBtn.onclick = () => {
   quizSelection.classList.add("active");
   popupInfo.classList.remove("active");
@@ -41,6 +43,7 @@ continueBtn.onclick = () => {
 tryAgainBtn.onclick = () => {
   location.reload();
 };
+
 goHomeBtn.onclick = () => {
   location.reload();
 };
@@ -63,12 +66,14 @@ function showQuestions(index) {
   const questionText = document.querySelector(".question-text");
   questionText.textContent = `${questions[index].numb}. ${questions[index].questions}`;
   let optionTag = questions[index].options
-    .map(option => `<div class="option"><span>${option}</span></div>`) 
+    .map(option => `<div class="option"><span>${option}</span></div>`)
     .join("");
   optionList.innerHTML = optionTag;
+
   document.querySelectorAll(".option").forEach(option => {
     option.setAttribute("onclick", "optionSelected(this)");
   });
+
   const factEl = document.querySelector(".fun-fact");
   if (factEl) factEl.remove();
 }
@@ -80,9 +85,7 @@ function optionSelected(answer) {
   let allOptions = optionList.children.length;
 
   const factPopup = document.createElement("div");
-  factPopup.className = "fun-fact";
-  factPopup.style.marginTop = "10px";
-  factPopup.style.fontSize = "14px";
+  factPopup.classList.add("fun-fact");
 
   if (userAnswer === correctAnswer) {
     userScore++;
@@ -92,11 +95,13 @@ function optionSelected(answer) {
     answer.classList.add("incorrect");
     lives--;
     displayHearts();
+
     for (let i = 0; i < allOptions; i++) {
       if (optionList.children[i].textContent === correctAnswer) {
         optionList.children[i].classList.add("correct");
       }
     }
+
     factPopup.innerHTML = `❌ Wrong!<br>The correct answer is: <strong>${correctAnswer}</strong>`;
   }
 
@@ -108,8 +113,18 @@ function optionSelected(answer) {
   for (let i = 0; i < allOptions; i++) {
     optionList.children[i].classList.add("disabled");
   }
-  nextBtn.classList.add("active");
+
   optionList.parentElement.appendChild(factPopup);
+  factPopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  if (userAnswer !== correctAnswer) {
+   
+    setTimeout(() => {
+      nextBtn.click();
+    }, 1500);
+  } else {
+    nextBtn.classList.add("active");
+  }
 }
 
 function questionCounter(index) {
@@ -122,14 +137,32 @@ function startTimer(time) {
   counter = setInterval(() => {
     time--;
     timerText.textContent = time;
+
     if (time <= 0) {
       clearInterval(counter);
       lives--;
       displayHearts();
+
       if (lives <= 0) {
         showResultBox(true);
       } else {
-        nextBtn.classList.add("active");
+       
+        const factPopup = document.createElement("div");
+        factPopup.classList.add("fun-fact");
+        factPopup.innerHTML = `⏱️ Time’s up!<br>The correct answer was: <strong>${questions[questionCount].answer}</strong>`;
+        optionList.parentElement.appendChild(factPopup);
+        factPopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        for (let i = 0; i < optionList.children.length; i++) {
+          if (optionList.children[i].textContent === questions[questionCount].answer) {
+            optionList.children[i].classList.add("correct");
+          }
+          optionList.children[i].classList.add("disabled");
+        }
+
+        setTimeout(() => {
+          nextBtn.click();
+        }, 1500);
       }
     }
   }, 1000);
